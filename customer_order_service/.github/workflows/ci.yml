@@ -1,0 +1,39 @@
+name: Django CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_DB: ordersdb
+          POSTGRES_USER: brian  # Your PostgreSQL username
+          POSTGRES_PASSWORD: ouma@2001  # Your PostgreSQL password
+        options: >-
+          --health-cmd "pg_isready"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Run Tests
+        run: |
+          coverage run manage.py test
+          coverage report
+
